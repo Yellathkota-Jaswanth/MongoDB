@@ -1,0 +1,84 @@
+												MongoDb Task2
+												
+												
+	
+1.Find all the topics and tasks which are thought in the month of October
+
+db.topics.find({month:October},{})
+db.tasks.find({date:{$gte:01-10-2024},{$lte:31-10-2024}},{})
+
+
+
+
+
+2.Find all the company drives which appeared between 15 oct-2020 and 31-oct-2020
+
+db.companydrives.find({date:{$gte:01-10-2024},{$lte:31-10-2024}},{})
+
+
+3.Find all the company drives and students who are appeared for the placement.
+
+
+db.company_drives.aggregate([
+  {
+    $lookup: {
+      from: "users",
+      localField: "students",
+      foreignField: "_id",
+      as: "students_info"
+    }
+  }
+])
+
+
+
+4.Find the number of problems solved by the user in codekata
+
+db.codekata.aggregate([
+  {
+    $match: { user_id: "user_id" }
+  },
+  {
+    $group: {
+      _id: "$user_id",
+      total_problems_solved: { $sum: "$problems_solved" }
+    }
+  }
+])
+
+
+5.Find all the mentors with who has the mentee's count more than 15
+
+db.mentors.find({ "mentees.15": { $exists: true } })
+
+6.Find the number of users who are absent and task is not submitted  between 15 oct-2020 and 31-oct-2020
+
+db.attendance.aggregate([
+  {
+    $match: {
+      date: { $gte: new Date("2020-10-15T00:00:00Z"), $lte: new Date("2020-10-31T23:59:59Z") },
+      status: "absent"
+    }
+  },
+  {
+    $lookup: {
+      from: "tasks",
+      localField: "user_id",
+      foreignField: "user_id",
+      as: "tasks_info"
+    }
+  },
+  {
+    $match: {
+      "tasks_info.submitted": false
+    }
+  },
+  {
+    $group: {
+      _id: "$user_id",
+      absent_and_not_submitted_count: { $sum: 1 }
+    }
+  }
+])
+
+											
